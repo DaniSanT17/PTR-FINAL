@@ -22,6 +22,9 @@ Matrix ModeloRefYm(Matrix YmLinha, Matrix YmLinhaAntigo, double ts)
     Matrix ym = matrix_zeros(2,1);
     VALUES(ym, 0,0) = (ts)*(VALUES(YmLinha,0,0)+VALUES(YmLinhaAntigo,0,0))/2;
     VALUES(ym, 1,0) = (ts)*(VALUES(YmLinha,1,0)+VALUES(YmLinhaAntigo,1,0))/2;
+    // VALUES(ym, 0,0) = (ts)*(VALUES(YmLinha,0,0));
+    // VALUES(ym, 1,0) = (ts)*(VALUES(YmLinha,1,0));
+
     return ym;
 }
 
@@ -43,7 +46,7 @@ void* ModeloRef(void*args)
         mutexes_getYmdot(&auxBuffer);
         mutexes_getYm(&auxBuffer2);
         bufferYmLinha=y_m(bufferRef,auxBuffer2);
-        bufferYm=ModeloRefYm(bufferYmLinha, auxBuffer, 0.03);
+        bufferYm=ModeloRefYm(bufferYmLinha, auxBuffer, T/1000);
         mutexes_setYmdot(bufferYmLinha);
         mutexes_setYm(bufferYm);
         // printf("ym: %lf, %lf, %lf\n", tref,VALUES(bufferYm, 0, 0), VALUES(bufferYm, 0, 1));

@@ -26,9 +26,12 @@ Matrix RoboXtLinha(Matrix xt, Matrix ut)
 Matrix RoboXt(Matrix XtLinha, Matrix XtLinhaAntigo, double ts)
 {
     Matrix Xt = matrix_zeros(3,1);
-    VALUES(Xt,0,0) = (ts)*(VALUES(XtLinha,0,0)+VALUES(XtLinhaAntigo,0,0)/2);
+    VALUES(Xt,0,0) = (ts)*(VALUES(XtLinha,0,0)+VALUES(XtLinhaAntigo,0,0))/2;
     VALUES(Xt,1,0) = (ts)*(VALUES(XtLinha,1,0)+VALUES(XtLinhaAntigo,1,0))/2;
     VALUES(Xt,2,0) = (ts)*(VALUES(XtLinha,2,0)+VALUES(XtLinhaAntigo,2,0))/2;
+    // VALUES(Xt,0,0) = ts*(VALUES(XtLinha,0,0));
+    // VALUES(Xt,1,0) = ts*(VALUES(XtLinha,1,0));
+    // VALUES(Xt,2,0) = ts*VALUES(XtLinha,2,0);
     return Xt;
 }
 
@@ -78,7 +81,6 @@ void* Robo(void*args)
         mutexes_setX(bufferX);
         mutexes_setY(bufferY);
 
-        printf("%lf, %lf, %lf, %lf\n", tref, VALUES(bufferX, 0,0),VALUES(bufferX, 1,0), VALUES(bufferX, 2,0));
 
         clock_gettime(CLOCK_REALTIME, &ts2);
         ts3.tv_sec = 0;
