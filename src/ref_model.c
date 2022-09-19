@@ -4,9 +4,20 @@
 #include "matrix.h"
 #include "parameters.h"
 #include "ref_model.h"
+#include "jitter.h"
 
 #define ALPHA1 3.0
 #define ALPHA2 3.0
+
+double JitterModelRef[ TempMax*1000/30 - 1];
+double TModelRef[TempMax*1000/30 - 1];
+
+double* getTModelRef(){
+    return TModelRef;
+}
+double* getJitterModelRef(){
+    return JitterModelRef;
+}
 
 Matrix calc_ym_dot(Matrix ref, Matrix ym){
 
@@ -32,12 +43,19 @@ void* ref_model_thread(void*args)
     double tref = 0;    //tempo calculado
     double tm = 0;      //tempo medido
     double T = 30;      //milissegundos
+    int i = 0;
     struct timespec ts1, ts2, ts3={0};
     Matrix bufferRef, bufferYm, bufferYmLinha, auxBuffer, auxBuffer2;
+    
     while(tref<=TempMax*1000)
     {   
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+        if(tref>0){
+            TModelRef[i] = calc_lat(ts1.tv_nsec, tm);
+            JitterModelRef[i] = calc_jitter(TModelRef[i], T);
+            i++;
+        }
+        tm = (double) ts1.tv_nsec/1000000;
         tref = tref + T;
 
         // Acesso aos mutexes

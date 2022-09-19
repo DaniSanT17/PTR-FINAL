@@ -5,16 +5,28 @@
 #include "matrix.h"
 #include "parameters.h"
 #include "controller.h"
+#include "jitter.h"
 
 #define ALPHA1 3.0
 #define ALPHA2 3.0
 
+
+double TController[TempMax*1000/30-1];
+double JitterController[TempMax*1000/30-1];
+
+double* getTController(){
+    return TController;
+}
+double* getJitterController(){
+    return JitterController;
+}
+
 Matrix calc_vt(Matrix ym_dot, Matrix ym, Matrix y)
 {
-    Matrix vt = matrix_zeros(2,1);
-    VALUES(vt, 0, 0) = VALUES(ym_dot,0,0) + ALPHA1 * (VALUES(ym,0,0) - VALUES(y,0,0));
-    VALUES(vt, 1, 0) = VALUES(ym_dot,1,0) + ALPHA2 * (VALUES(ym,1,0) - VALUES(y,1,0));
-    return vt;
+    Matrix v = matrix_zeros(2,1);
+    VALUES(v, 0, 0) = VALUES(ym_dot,0,0) + ALPHA1 * (VALUES(ym,0,0) - VALUES(y,0,0));
+    VALUES(v, 1, 0) = VALUES(ym_dot,1,0) + ALPHA2 * (VALUES(ym,1,0) - VALUES(y,1,0));
+    return v;
 }
 
 // Thread do Bloco Controle
@@ -23,11 +35,17 @@ void* controller_thread(void*args)
     double tref = 0;       //tempo calculado
     double tm = 0;      //tempo medido
     double T = 30;      //milissegundos
+    int i = 0;
     struct timespec ts1, ts2, ts3={0};
     Matrix bufferV, bufferYmDot, bufferYm, bufferY;
     while(tref <= TempMax*1000) {
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+        if(tref>0){
+            TController[i] = calc_lat(ts1.tv_nsec, tm);
+            JitterController[i] = calc_jitter(TController[i], T);
+            i++;
+        }
+        tm = (double) ts1.tv_nsec/1000000;
         tref = tref + T;
 
         // Acesso aos mutexes

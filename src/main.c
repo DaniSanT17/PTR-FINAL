@@ -4,13 +4,9 @@
 	date: setembro, 2022
 */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <math.h>
 #include <pthread.h>
-#include <stdio.h>
-#include <unistd.h>
+
 
 #include "mutexes.h"
 
@@ -23,12 +19,6 @@
 
 //os buffers serão as variaveis entre os blocos, vão ser dados por matrizes
 double TempMax = 14;
-// //Contadores de Jitter
-// double JitterRef120[400];
-// double JitterModeloRef[400];
-// double JitterControle[400];
-// double JitterLinearizacao[400];
-// double JitterRobo[400];
 
 // int contRef120=0;
 // int contModeloRef=0;
@@ -51,7 +41,7 @@ int main(){
     pthread_create(&TController, NULL, controller_thread, NULL);
     pthread_create(&TLinear, NULL, linear_thread, NULL); 
     pthread_create(&TRobot, NULL, robot_thread, NULL);
-    pthread_create(&TPrint_outs, NULL, print_outs, NULL);
+    // pthread_create(&TPrint_outs, NULL, print_outs, NULL);
 
 
     // Encerrando a execução das Threads
@@ -60,7 +50,9 @@ int main(){
     pthread_join(TController, NULL);
     pthread_join(TLinear, NULL);
     pthread_join(TRobot, NULL);
-    pthread_join(TPrint_outs, NULL);
+    // pthread_join(TPrint_outs, NULL);
+
+
     
     // Destruindo os Mutexes
     mutexes_destroy();

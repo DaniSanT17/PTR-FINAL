@@ -8,9 +8,18 @@
 #include <time.h>
 #include "reference.h"
 #include "parameters.h"
-
+#include "jitter.h"
 #include "mutexes.h"
 
+double JitterRef[TempMax*1000/5-1];
+double TRef[TempMax*1000/50-1];
+
+double* getTRef(){
+    return TRef;
+}
+double* getJitterRef(){
+    return JitterRef;
+}
 
 Matrix calc_ref(double t) {
     Matrix ref;
@@ -35,16 +44,24 @@ Matrix calc_ref(double t) {
 
 // Thread do Bloco de Referência
 void* ref_thread(void*args)
-{
+{   
     double tref = 0;    //tempo calculado
     double tm = 0;      //tempo medido
     double T = 50;      //milissegundos
     struct timespec ts1, ts2, ts3={0};
+    int i = 0;
     Matrix bufferRef;
     while(tref<=TempMax*1000)
     {   
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+        if(tref>0){
+            TRef[i] = calc_lat(ts1.tv_nsec, tm);
+            JitterRef[i] = calc_jitter(TRef[i], T);
+            printf("%lf %lf\n", TRef[i], JitterRef[i]);
+            i++;
+        }
+        
+        tm = (double) ts1.tv_nsec/1000000;
         tref = tref + T;
 
         // Acesso aos mutexes

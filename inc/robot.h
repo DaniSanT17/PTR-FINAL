@@ -8,3 +8,6 @@ Matrix calc_y(Matrix x, double R);
 
 void* robot_thread(void*args);
 
+double* getTRobot();
+
+double* getJitterRobot();

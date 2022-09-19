@@ -7,7 +7,17 @@
 #include "matrix.h"
 #include "parameters.h"
 #include "linear.h"
+#include "jitter.h"
 
+double TLinear[TempMax*1000/20 -1];
+double JitterLinear[TempMax*1000/20 -1];
+
+double* getTLinear(){
+    return TLinear;
+}
+double* getJitterLinear(){
+    return JitterLinear;
+}
 
 Matrix calc_ut(Matrix x, Matrix v, double R)
 {
@@ -29,11 +39,16 @@ void* linear_thread(void*args)
     double tm = 0;      //tempo medido
     double T = 20;      //milissegundos
     struct timespec ts1, ts2, ts3={0};
-    
+    int i =0;
     Matrix bufferU, bufferX, bufferV;
     while(t <= TempMax*1000) {
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+        if(t>0){
+            TLinear[i] = calc_lat(ts1.tv_nsec, tm);
+            JitterLinear[i] = calc_jitter(TLinear[i], T);
+            i++;
+        }
+        tm = (double) ts1.tv_nsec/1000000;
         t = t + T;
         
         // Acesso aos mutexes

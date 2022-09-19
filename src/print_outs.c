@@ -2,6 +2,7 @@
 #include <time.h>
 
 #include "mutexes.h"
+#include "jitter.h"
 #include "matrix.h"
 #include "parameters.h"
 
@@ -10,17 +11,16 @@ void* print_outs (void* args){
 
     double tref = 0;    //tempo calculado
     double tm = 0;      //tempo medido
-    double T = 20;      //milissegundos
+    double T = 100;      //milissegundos
     struct timespec ts1, ts2, ts3={0};
     
     Matrix bufferRef, bufferYm, bufferYmdot, bufferV, bufferU, bufferX, bufferY, bufferXdot; 
 
     while(tref <= TempMax*1000) {
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+
+        tm = (double) ts1.tv_nsec/1000000;
         tref = tref + T;
-
-
         mutexes_getRef(&bufferRef);
         mutexes_getYm(&bufferYm);
         mutexes_getYmdot(&bufferYmdot);

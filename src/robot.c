@@ -8,6 +8,18 @@
 #include "matrix.h"
 #include "robot.h"
 #include "mutexes.h"
+#include "jitter.h"
+
+
+double TRobot[TempMax*1000/10-1];
+double JitterRobot[TempMax*1000/10-1];
+
+double* getTRobot(){
+    return TRobot;
+}
+double* getJitterRobot(){
+    return JitterRobot;
+}
 
 //Bloco robo
 
@@ -60,12 +72,19 @@ void* robot_thread(void*args)
     double tm = 0;      //tempo medido
     double T = 10;      //milissegundos
     struct timespec ts1, ts2, ts3={0};
-    
+    int i = 0;
+
     Matrix auxBuffer, bufferX, bufferY, bufferU, x_dot;
 
     while(tref <= TempMax*1000) {
         clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
+        if(tref>0){
+            TRobot[i] = calc_lat(ts1.tv_nsec, tm);
+            JitterRobot[i] = calc_jitter(TRobot[i], T);
+            i++;
+        }
+        tm = (double) ts1.tv_nsec/1000000;
+
         tref = tref + T;
         
         mutexes_getXdot(&auxBuffer);
