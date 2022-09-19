@@ -50,14 +50,14 @@ void* ref_thread(void*args)
     double T = 50;      //milissegundos
     struct timespec ts1, ts2, ts3={0};
     int i = 0;
-    double Tacumulated = 0;
+    double tmsum = 0;
     Matrix bufferRef;
     while(tref<=TempMax*1000)
     {   
         clock_gettime(CLOCK_REALTIME, &ts1);
         if(tref>0){
             TRef[i] = calc_lat(ts1.tv_nsec, tm);
-            Tacumulated += TRef[i];
+            tmsum += TRef[i];
             JitterRef[i] = calc_jitter(TRef[i], T);
             // printf("%lf %lf\n", TRef[i], JitterRef[i]);
             i++;
@@ -67,7 +67,7 @@ void* ref_thread(void*args)
         tref = tref + T;
 
         // Acesso aos mutexes
-        bufferRef = calc_ref(Tacumulated/1000);
+        bufferRef = calc_ref(tmsum/1000);
         mutexes_setRef(bufferRef);
 
         // Dormindo a thread

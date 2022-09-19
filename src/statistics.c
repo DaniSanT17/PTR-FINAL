@@ -7,16 +7,16 @@
 
 double mean(double* v, double T){
     double sum = 0;
-    for(int i = 1; i < 14000/T;i++){
+    for(int i = 0; i < 14000/T;i++){
         sum += v[i];
     }
     return sum/(14000/T);
 }
 
 double max_min(double* v,double T, int mode){
-    double min = v[1];
-    double max = v[1];
-    for(int i = 1; i < (14000/T); i++){
+    double min = v[0];
+    double max = v[0];
+    for(int i = 0; i < (14000/T-1); i++){
         if(min > v[i]){
             min = v[i];
         }
@@ -63,9 +63,9 @@ double* JitterRobot, double* TRobot)
     maxTRef = max_min(TRef, 50, 1); minTRef =  max_min(TRef, 50, 0);
 
     meanJMRef = mean(JitterModelRef, 30); varJMRef = var_dp(JitterModelRef, 30, 0); dpJMRef = var_dp(JitterModelRef, 30, 1); 
-    maxJMRef = max_min(JitterModelRef, 30, 1); minJMRef =  max_min(JitterModelRef, 30, 0);
+    maxJMRef = max_min(JitterModelRef, 30, 1);minJMRef =  max_min(JitterModelRef, 30, 0);
     meanTMRef = mean(TModelRef, 30); varTMRef = var_dp(TModelRef, 30, 0); dpTMRef = var_dp(TModelRef, 30, 1); 
-    maxTMRef = max_min(TModelRef, 30, 1); minTMRef =  max_min(TModelRef, 30, 0);
+    maxTMRef = max_min(TModelRef, 30, 1);minTMRef =  max_min(TModelRef, 30, 0);
 
     meanJCtrl = mean(JitterController, 30); varJCtrl = var_dp(JitterController, 30, 0); dpJCtrl = var_dp(JitterController, 30, 1); 
     maxJCtrl = max_min(JitterController, 30, 1); minJCtrl =  max_min(JitterController, 30, 0);
@@ -87,13 +87,13 @@ double* JitterRobot, double* TRobot)
 
     //abrindo o arquivo
     pont_arq = fopen("metrics.txt", "w");
-    fprintf(pont_arq,"JRef\tJMRef\tJCtrl\tJLin\tJRob\n");
+    fprintf(pont_arq,"\tJRef\tJMRef\tJCtrl\tJLin\tJRob\n");
     fprintf(pont_arq,"Médias: %lf\t%lf\t%lf\t%lf\t%lf\n",meanJRef,meanJMRef,meanJCtrl,meanJLin,meanJRob);
     fprintf(pont_arq,"Variancias: %lf\t%lf\t%lf\t%lf\t%lf\n",varJRef,varJMRef,varJCtrl,varJLin,varJRob);
     fprintf(pont_arq,"DP: %lf\t%lf\t%lf\t%lf\t%lf\n",dpJRef,dpJMRef,dpJCtrl,dpJLin,dpJRob);
     fprintf(pont_arq,"Máximo: %lf\t%lf\t%lf\t%lf\t%lf\n",maxJRef,maxJMRef,maxJCtrl,maxJLin,maxJRob);
     fprintf(pont_arq,"Mínimo: %lf\t%lf\t%lf\t%lf\t%lf\n\n",minJRef,minJMRef,minJCtrl,minJLin,minJRob);
-    fprintf(pont_arq,"TRef\tTMRef\tTCtrl\tTLin\tTRob\n");
+    fprintf(pont_arq,"\tTRef\tTMRef\tTCtrl\tTLin\tTRob\n");
     fprintf(pont_arq,"Médias: %lf\t%lf\t%lf\t%lf\t%lf\n",meanTRef,meanTMRef,meanTCtrl,meanTLin,meanTRob);
     fprintf(pont_arq,"Variancias: %lf\t%lf\t%lf\t%lf\t%lf\n",varTRef,varTMRef,varTCtrl,varTLin,varTRob);
     fprintf(pont_arq,"DP: %lf\t%lf\t%lf\t%lf\t%lf\n",dpTRef,dpTMRef,dpTCtrl,dpTLin,dpTRob);
