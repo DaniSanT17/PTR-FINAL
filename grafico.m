@@ -26,15 +26,15 @@ plot(Out{:,12},Out{:,13});
 title("Xc vs Yc");
 
 figure();
-plot(Out{:,1},Out{:,12});
+plot(Out{:,1}/1000,Out{:,12});
 title("Xc vs t");
 
 figure();
-plot(Out{:,1},Out{:,13});
+plot(Out{:,1}/1000,Out{:,13});
 title("Yc vs t");
 
 figure();
-plot(Out{:,1},Out{:,14});
+plot(Out{:,1}/1000,Out{:,14});
 title("Theta vs t");
 
 figure();
