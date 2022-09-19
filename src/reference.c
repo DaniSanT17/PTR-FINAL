@@ -2,27 +2,15 @@
     Implementação de Ref
 */
 
-#include <semaphore.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-#include "ref.h"
+#include "reference.h"
 #include "parameters.h"
 
 #include "mutexes.h"
 
-// int contRef120=0;
-// // double t = 0;
-// //Semaforos para os Produtores
-// sem_t ProduzRef;
-
-// //Semaforos Para os Consumidores
-// sem_t ConsomeRef;
-
-// Matrix bufferRef;
-
-// // T = 0.5;
 
 Matrix calc_ref(double t) {
     Matrix ref;
@@ -44,7 +32,9 @@ Matrix calc_ref(double t) {
     return ref;
 }
 
-void* Ref120(void*args)
+
+// Thread do Bloco de Referência
+void* ref_thread(void*args)
 {
     double tref = 0;    //tempo calculado
     double tm = 0;      //tempo medido
@@ -57,10 +47,11 @@ void* Ref120(void*args)
         tm = 1000000 * ts1.tv_nsec - tm;
         tref = tref + T;
 
+        // Acesso aos mutexes
         bufferRef = calc_ref(tref/1000);
         mutexes_setRef(bufferRef);
-        // printf("ref: %lf, %lf, %lf\n", tref, VALUES(bufferRef, 0, 0), VALUES(bufferRef, 0, 1));
 
+        // Dormindo a thread
         clock_gettime(CLOCK_REALTIME, &ts2);
         ts3.tv_sec = 0;
         ts3.tv_nsec = T*1000000 - (ts2.tv_nsec - ts1.tv_nsec);

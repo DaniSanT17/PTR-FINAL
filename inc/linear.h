@@ -1,5 +1,9 @@
+/*
+    Define a thread linear
+*/
+
 #include "matrix.h"
 
-Matrix Linearizacao(Matrix xt, Matrix vt, double R);
+Matrix calc_ut(Matrix x, Matrix v, double R);
 
-void* Linear(void*args);
+void* linear_thread(void*args);

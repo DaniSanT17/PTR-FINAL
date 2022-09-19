@@ -1,8 +1,7 @@
 /*
-	main.c: Entrada para a simulação
-	author: Andre Cavalcante
-	date: agosto, 2022
-	license: CC BY-SA
+	main.c: Implementação da Simulação do controle
+	author: Daniel Santiago
+	date: setembro, 2022
 */
 
 #include <stdio.h>
@@ -11,15 +10,16 @@
 #include <math.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <unistd.h>
+
 #include "mutexes.h"
 
-#include "ref.h"
-#include "control.h"
+#include "reference.h"
+#include "controller.h"
 #include "linear.h"
 #include "ref_model.h"
-#include "robo.h"
+#include "robot.h"
+#include "print_outs.h"
 
 //os buffers serão as variaveis entre os blocos, vão ser dados por matrizes
 double TempMax = 14;
@@ -37,76 +37,36 @@ double TempMax = 14;
 // int contRobo=0;
 
 
-void* print_outs (void* args){
-    // 
-    // while (t<TempMax)
-    // {           
-
-      
-    // }
-    double tref = 0;       //tempo calculado
-    double tm = 0;      //tempo medido
-    double T = 200;      //milissegundos
-    struct timespec ts1, ts2, ts3={0};
-    
-    Matrix bufferRef, bufferYm, bufferYmdot, bufferV, bufferU, bufferX, bufferY, bufferXdot; 
-
-    while(tref <= TempMax*1000) {
-        clock_gettime(CLOCK_REALTIME, &ts1);
-        tm = 1000000 * ts1.tv_nsec - tm;
-        tref = tref + T;
-
-
-        mutexes_getRef(&bufferRef);
-        mutexes_getYm(&bufferYm);
-        mutexes_getYmdot(&bufferYmdot);
-        mutexes_getV(&bufferV);
-        mutexes_getU(&bufferU);
-        mutexes_getX(&bufferX);
-        mutexes_getY(&bufferY);
-        mutexes_getXdot(&bufferXdot);
-        printf("%.4f, %.4f, %.4f, ", tref, VALUES(bufferRef,0,0),VALUES(bufferRef,1,0));
-        printf("%.4f, %.4f, ", VALUES(bufferYm,0,0),VALUES(bufferYm,1,0));
-        printf("%.4f, %.4f, ", VALUES(bufferYmdot,0,0),VALUES(bufferYmdot,1,0));
-        printf("%.4f, %.4f, ", VALUES(bufferV,0,0),VALUES(bufferV,1,0));
-        printf("%.4f, %.4f, ", VALUES(bufferU,0,0),VALUES(bufferU,1,0));
-        printf("%.4f, %.4f, %.4f, ", VALUES(bufferX,0,0),VALUES(bufferX,1,0), VALUES(bufferX,2,0));
-        printf("%.4f, %.4f, %.4f, ", VALUES(bufferXdot,0,0),VALUES(bufferXdot,1,0),VALUES(bufferXdot,2,0));
-        printf("%.4f, %.4f\n", VALUES(bufferY,0,0),VALUES(bufferY,1,0));
-
-        clock_gettime(CLOCK_REALTIME, &ts2);
-        ts3.tv_sec = 0;
-        ts3.tv_nsec = T*1000000 - (ts2.tv_nsec - ts1.tv_nsec);
-        nanosleep(&ts3, &ts3);
-    }
-    return 0;
-} 
-
-
 int main(){
+    // Iniciando os mutexes
     mutexes_init();
 
-    //Nomeando as Threads
-    pthread_t TRef120, TModeloRef, TControle, TLinearizacao, TRobo, Print_mostra;
+    //Definindo as Threads usadas
+    pthread_t TRef_thread, TRef_model, TController, TLinear, TRobot, TPrint_outs;
 
-    //Criando as Threads
-    pthread_create(&TRef120, NULL, Ref120, NULL);
-    pthread_create(&TModeloRef, NULL, ModeloRef, NULL);
-    pthread_create(&TControle, NULL, Controle, NULL);
-    pthread_create(&TLinearizacao, NULL, Linear, NULL); 
-    pthread_create(&TRobo, NULL, Robo, NULL);
-    pthread_create(&Print_mostra, NULL, print_outs, NULL);
-
-
-    // Finalizando as Threads
-    pthread_join(TRef120, NULL);
-    pthread_join(TModeloRef, NULL);
-    pthread_join(TControle, NULL);
-    pthread_join(TLinearizacao, NULL);
-    pthread_join(TRobo, NULL);
-    pthread_join(Print_mostra, NULL);
     
+    // Criação das threads para execução
+    pthread_create(&TRef_thread, NULL, ref_thread, NULL);
+    pthread_create(&TRef_model, NULL, ref_model_thread, NULL);
+    pthread_create(&TController, NULL, controller_thread, NULL);
+    pthread_create(&TLinear, NULL, linear_thread, NULL); 
+    pthread_create(&TRobot, NULL, robot_thread, NULL);
+    pthread_create(&TPrint_outs, NULL, print_outs, NULL);
+
+
+    // Encerrando a execução das Threads
+    pthread_join(TRef_thread, NULL);
+    pthread_join(TRef_model, NULL);
+    pthread_join(TController, NULL);
+    pthread_join(TLinear, NULL);
+    pthread_join(TRobot, NULL);
+    pthread_join(TPrint_outs, NULL);
+    
+    // Destruindo os Mutexes
     mutexes_destroy();
+
+    // Calculando a extatística
     // Statistics_Calculing(JitterRef120,JitterModeloRef,JitterControle,JitterLinearizacao,JitterRobo,TempMax);
+
     exit(0);
 }

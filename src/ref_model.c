@@ -8,28 +8,26 @@
 #define ALPHA1 3.0
 #define ALPHA2 3.0
 
-Matrix y_m(Matrix ref, Matrix Ym){
+Matrix calc_ym_dot(Matrix ref, Matrix ym){
 
-  Matrix ymLinha = matrix_zeros(2,1);
-  VALUES(ymLinha, 0 , 0) = ALPHA1*(VALUES(ref,0,0)-VALUES(Ym,0,0));
-  VALUES(ymLinha, 1 , 0) = ALPHA2*(VALUES(ref,1,0)-VALUES(Ym,1,0));
-  return ymLinha;
+  Matrix ym_dot = matrix_zeros(2,1);
+  VALUES(ym_dot, 0 , 0) = ALPHA1*(VALUES(ref,0,0)-VALUES(ym,0,0));
+  VALUES(ym_dot, 1 , 0) = ALPHA2*(VALUES(ref,1,0)-VALUES(ym,1,0));
+  return ym_dot;
 
 }
 
-Matrix ModeloRefYm(Matrix YmLinha, Matrix YmLinhaAntigo, double ts)
+Matrix calc_ym(Matrix ym_dot, Matrix last_ym_dot, double ts)
 {
     Matrix ym = matrix_zeros(2,1);
-    VALUES(ym, 0,0) = (ts)*(VALUES(YmLinha,0,0)+VALUES(YmLinhaAntigo,0,0))/2;
-    VALUES(ym, 1,0) = (ts)*(VALUES(YmLinha,1,0)+VALUES(YmLinhaAntigo,1,0))/2;
-    // VALUES(ym, 0,0) = (ts)*(VALUES(YmLinha,0,0));
-    // VALUES(ym, 1,0) = (ts)*(VALUES(YmLinha,1,0));
+    VALUES(ym, 0,0) = (ts)*(VALUES(ym_dot,0,0)+VALUES(last_ym_dot,0,0))/2;
+    VALUES(ym, 1,0) = (ts)*(VALUES(ym_dot,1,0)+VALUES(last_ym_dot,1,0))/2;
 
     return ym;
 }
 
-
-void* ModeloRef(void*args)
+// Thread do Bloco Controle
+void* ref_model_thread(void*args)
 {
     double tref = 0;    //tempo calculado
     double tm = 0;      //tempo medido
@@ -42,15 +40,16 @@ void* ModeloRef(void*args)
         tm = 1000000 * ts1.tv_nsec - tm;
         tref = tref + T;
 
+        // Acesso aos mutexes
         mutexes_getRef(&bufferRef);
         mutexes_getYmdot(&auxBuffer);
         mutexes_getYm(&auxBuffer2);
-        bufferYmLinha=y_m(bufferRef,auxBuffer2);
-        bufferYm=ModeloRefYm(bufferYmLinha, auxBuffer, T/1000);
+        bufferYmLinha=calc_ym_dot(bufferRef,auxBuffer2);
+        bufferYm=calc_ym(bufferYmLinha, auxBuffer, 0.03);
         mutexes_setYmdot(bufferYmLinha);
         mutexes_setYm(bufferYm);
-        // printf("ym: %lf, %lf, %lf\n", tref,VALUES(bufferYm, 0, 0), VALUES(bufferYm, 0, 1));
 
+        // Dormindo a thread
         clock_gettime(CLOCK_REALTIME, &ts2);
         ts3.tv_sec = 0;
         ts3.tv_nsec = T*1000000 - (ts2.tv_nsec - ts1.tv_nsec);

@@ -1,7 +1,11 @@
+/*
+    Define a thread ref_model
+*/
+
 #include "matrix.h"
 
-Matrix y_m(Matrix ref, Matrix Ym);
+Matrix calc_ym_dot(Matrix ref, Matrix ym); // Cálculo dos valores de ym_dot
 
-Matrix ModeloRefYm(Matrix YmLinha, Matrix YmLinhaAntigo, double t);
+Matrix calc_ym(Matrix ym_dot, Matrix last_ym_dot, double t); // Cálculo dos valores de ym
 
-void* ModeloRef(void*args);
+void* ref_model_thread(void*args); // Thread para execução da referência
