@@ -57,7 +57,7 @@ void* ref_thread(void*args)
         if(tref>0){
             TRef[i] = calc_lat(ts1.tv_nsec, tm);
             JitterRef[i] = calc_jitter(TRef[i], T);
-            printf("%lf %lf\n", TRef[i], JitterRef[i]);
+            // printf("%lf %lf\n", TRef[i], JitterRef[i]);
             i++;
         }
         

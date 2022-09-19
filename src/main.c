@@ -41,7 +41,7 @@ int main(){
     pthread_create(&TController, NULL, controller_thread, NULL);
     pthread_create(&TLinear, NULL, linear_thread, NULL); 
     pthread_create(&TRobot, NULL, robot_thread, NULL);
-    // pthread_create(&TPrint_outs, NULL, print_outs, NULL);
+    pthread_create(&TPrint_outs, NULL, print_outs, NULL);
 
 
     // Encerrando a execução das Threads
@@ -50,7 +50,7 @@ int main(){
     pthread_join(TController, NULL);
     pthread_join(TLinear, NULL);
     pthread_join(TRobot, NULL);
-    // pthread_join(TPrint_outs, NULL);
+    pthread_join(TPrint_outs, NULL);
 
 
     
